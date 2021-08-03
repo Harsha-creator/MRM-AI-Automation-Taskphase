@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="rvizconfig" default="$(find urdf_tutorial)/rviz/urdf.rviz"/>
+  <arg name="model" default="$(find group_task2)/urdf/robot.urdf.xacro"/>
+  <param name="robot_description" command="cat '$(find group_task2)/urdf/robot.urdf.xacro'"/>
+
+
+
+<!-- new modification -->
+  <arg name="use_gui" default="true" doc="Should the joint_state_publisher use a GUI for controlling joint states" />
+<node pkg="joint_state_publisher" type="joint_state_publisher" name="joint_state_publisher" output="screen" unless="$(arg use_gui)" />
+<node pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" name="joint_state_publisher_gui" output="screen" if="$(arg use_gui)" />
+
+
+  <!-- send fake joint values
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+    <param name="use_gui" value="False"/>
+  </node> -->
+
+  <!-- Combine joint values -->
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" respawn="false" output="screen"/>
+
+  <!-- Show in Rviz   -->
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find group_task2)/rvizconfig/robotrvizconfig.rviz"/>
+<!-- camera-->
+  
+ <param name="robot_description" command="$(find xacro)/xacro $(find group_task2)/urdf/robot.urdf.xacro"/>
+  <param name="use_gui" value="true"/>
+
+
+<include file="$(find group_task2)/launch/gazebo.launch">
+  <arg name="model" value="$(arg model)"/>
+ </include>
+
+<node pkg="teleop_twist_keyboard" name="teleop_twist_keyboard" type="teleop_twist_keyboard.py" />
+
+<node pkg="tf" type="static_transform_publisher" name="base_to_kinect" args=" 0 0 0 0 0 1.5707 kinect_link horizontal_frame 100" />
+
+</launch>
